@@ -44,7 +44,6 @@ function нарисовать() {
     ? {name:active.name, value:active.value, start:active.selectionStart, end:active.selectionEnd} : null;
   const filters = эл('div','sh-filters');
   const counts = [2,5,16];
-  const visibleVariants = selectedEntry === 'button' ? toolbarVariants.filter(v => v.id === 'v6') : toolbarVariants;
   filters.append(
     фильтр('Открытие зума','entry',entryMethods.map(v => v.label),entryMethods.findIndex(v => v.id === selectedEntry),i => {
       selectedEntry = entryMethods[i].id;
@@ -53,8 +52,10 @@ function нарисовать() {
     }),
     фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => открыть(counts[i])),
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
-    фильтр('Варианты','toolbar',visibleVariants.map(v => v.label),visibleVariants.findIndex(v => v.id === selectedToolbar),i => {
-      selectedToolbar = visibleVariants[i].id;
+  );
+  if (selectedEntry === 'maximize') filters.append(
+    фильтр('Варианты','toolbar',toolbarVariants.map(v => v.label),toolbarVariants.findIndex(v => v.id === selectedToolbar),i => {
+      selectedToolbar = toolbarVariants[i].id;
       for (const frame of рамка.querySelectorAll('iframe')) frame.contentWindow?.postMessage({type:'participant-zoom-variant',variant:selectedToolbar},location.origin);
       запомнить();нарисовать();
     }),
