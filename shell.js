@@ -2,10 +2,10 @@
 const presets = JSON.parse(document.getElementById('presets').textContent);
 const address = new URLSearchParams(location.hash.slice(1));
 const toolbarVariants = JSON.parse(document.getElementById('toolbar-variants').textContent);
-let selectedToolbar = toolbarVariants.find(v => v.id === address.get('toolbar'))?.id || 'v6';
+const entryToolbarVariants = [{id:'v6',label:'Вариант 1 · Рука и рисование'},{id:'v6-toggle',label:'Вариант 2 · Карандаш вкл/выкл'}];
 const entryMethods = [{id:'maximize',label:'Через максимайз'},{id:'button',label:'Через «Увеличить»'}];
 let selectedEntry = entryMethods.find(v => v.id === address.get('entry'))?.id || 'maximize';
-if(selectedEntry === 'button') selectedToolbar = 'v6';
+let selectedToolbar = (selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants).find(v => v.id === address.get('toolbar'))?.id || 'v6';
 let selected = presets.find(p => p.id === (address.get('preset') || location.hash.slice(1))) || presets[0];
 размерОкна = Math.max(0, РАЗМЕРЫ.findIndex(s => s.id === address.get('size')));
 if (РАЗМЕРЫ[размерОкна].id === 'custom') {
@@ -47,15 +47,16 @@ function нарисовать() {
   filters.append(
     фильтр('Открытие зума','entry',entryMethods.map(v => v.label),entryMethods.findIndex(v => v.id === selectedEntry),i => {
       selectedEntry = entryMethods[i].id;
-      if(selectedEntry === 'button') selectedToolbar = 'v6';
+      if(!(selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants).some(v => v.id === selectedToolbar)) selectedToolbar = 'v6';
       синхронизировать();запомнить();нарисовать();
     }),
     фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => открыть(counts[i])),
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
   );
-  if (selectedEntry === 'maximize') filters.append(
-    фильтр('Варианты','toolbar',toolbarVariants.map(v => v.label),toolbarVariants.findIndex(v => v.id === selectedToolbar),i => {
-      selectedToolbar = toolbarVariants[i].id;
+  const variants = selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants;
+  filters.append(
+    фильтр('Варианты','toolbar',variants.map(v => v.label),variants.findIndex(v => v.id === selectedToolbar),i => {
+      selectedToolbar = variants[i].id;
       for (const frame of рамка.querySelectorAll('iframe')) frame.contentWindow?.postMessage({type:'participant-zoom-variant',variant:selectedToolbar},location.origin);
       запомнить();нарисовать();
     }),
