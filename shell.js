@@ -3,7 +3,7 @@ const presets = JSON.parse(document.getElementById('presets').textContent);
 const address = new URLSearchParams(location.hash.slice(1));
 const toolbarVariants = JSON.parse(document.getElementById('toolbar-variants').textContent);
 const entryToolbarVariants = [{id:'v6',label:'Вариант 1 · Рука и рисование'},{id:'v6-toggle',label:'Вариант 2 · Карандаш вкл/выкл'}];
-const entryMethods = [{id:'maximize',label:'Через максимайз'},{id:'button',label:'Через «Увеличить»'}];
+const entryMethods = [{id:'maximize',label:'Через максимайз'},{id:'maximize2',label:'Maximize 2'},{id:'button',label:'Через «Увеличить»'},{id:'preview',label:'Масштаб в меню'}];
 let selectedEntry = entryMethods.find(v => v.id === address.get('entry'))?.id || 'maximize';
 let selectedToolbar = (selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants).find(v => v.id === address.get('toolbar'))?.id || 'v6';
 let selected = presets.find(p => p.id === (address.get('preset') || location.hash.slice(1))) || presets[0];
@@ -54,7 +54,7 @@ function нарисовать() {
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
   );
   const variants = selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants;
-  filters.append(
+  if(selectedEntry !== 'preview') filters.append(
     фильтр('Варианты','toolbar',variants.map(v => v.label),variants.findIndex(v => v.id === selectedToolbar),i => {
       selectedToolbar = variants[i].id;
       for (const frame of рамка.querySelectorAll('iframe')) frame.contentWindow?.postMessage({type:'participant-zoom-variant',variant:selectedToolbar},location.origin);
