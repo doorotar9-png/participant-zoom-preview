@@ -33,7 +33,7 @@ function запомнить() {
 function открыть(count = selected.count, shares = selected.shares) {
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=0d61412263347589&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry);
+  подготовитьОкно('frame.html?v=0fe754e0f0f9c39e&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry);
   запомнить();
   нарисовать();
   вписать();
