@@ -4,8 +4,9 @@ const address = new URLSearchParams(location.hash.slice(1));
 const toolbarVariants = JSON.parse(document.getElementById('toolbar-variants').textContent);
 const entryToolbarVariants = [{id:'v6',label:'Вариант 1 · Рука и рисование'},{id:'v6-toggle',label:'Вариант 2 · Карандаш вкл/выкл'}];
 const entryMethods = [{id:'final',label:'Финальная'},{id:'maximize',label:'Через максимайз'},{id:'maximize2',label:'Maximize 2'},{id:'button',label:'Через «Увеличить»'},{id:'preview',label:'Масштаб в меню'}];
-let selectedEntry = entryMethods.find(v => v.id === address.get('entry'))?.id || 'final';
-let selectedToolbar = (selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants).find(v => v.id === address.get('toolbar'))?.id || 'v6';
+// The chosen version is fixed; legacy catalogues and implementations stay available in source.
+let selectedEntry = 'final';
+let selectedToolbar = 'v6';
 let selected = presets.find(p => p.id === (address.get('preset') || location.hash.slice(1))) || presets[0];
 размерОкна = Math.max(0, РАЗМЕРЫ.findIndex(s => s.id === address.get('size')));
 if (РАЗМЕРЫ[размерОкна].id === 'custom') {
@@ -32,7 +33,7 @@ function запомнить() {
 function открыть(count = selected.count, shares = selected.shares) {
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=ada93db902657a96&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry);
+  подготовитьОкно('frame.html?v=0d61412263347589&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry);
   запомнить();
   нарисовать();
   вписать();
@@ -45,21 +46,8 @@ function нарисовать() {
   const filters = эл('div','sh-filters');
   const counts = [2,5,16];
   filters.append(
-    фильтр('Открытие зума','entry',entryMethods.map(v => v.label),entryMethods.findIndex(v => v.id === selectedEntry),i => {
-      selectedEntry = entryMethods[i].id;
-      if(!(selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants).some(v => v.id === selectedToolbar)) selectedToolbar = 'v6';
-      синхронизировать();запомнить();нарисовать();
-    }),
     фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => открыть(counts[i])),
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
-  );
-  const variants = selectedEntry === 'button' ? entryToolbarVariants : toolbarVariants;
-  if(selectedEntry !== 'preview') filters.append(
-    фильтр('Варианты','toolbar',variants.map(v => v.label),variants.findIndex(v => v.id === selectedToolbar),i => {
-      selectedToolbar = variants[i].id;
-      for (const frame of рамка.querySelectorAll('iframe')) frame.contentWindow?.postMessage({type:'participant-zoom-variant',variant:selectedToolbar},location.origin);
-      запомнить();нарисовать();
-    }),
   );
   панель.replaceChildren(шапкаУстройства(),filters);
   if (focus) {
