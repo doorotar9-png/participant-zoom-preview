@@ -1,6 +1,7 @@
 // Project data on the original prototype shell. Base helpers are copied unchanged.
 const presets = JSON.parse(document.getElementById('presets').textContent);
 const address = new URLSearchParams(location.hash.slice(1));
+const touchPreview = address.get('input') === 'touch';
 const toolbarVariants = JSON.parse(document.getElementById('toolbar-variants').textContent);
 const entryToolbarVariants = [{id:'v6',label:'Вариант 1 · Рука и рисование'},{id:'v6-toggle',label:'Вариант 2 · Карандаш вкл/выкл'}];
 const entryMethods = [{id:'final',label:'Финальная'},{id:'maximize',label:'Через максимайз'},{id:'maximize2',label:'Maximize 2'},{id:'button',label:'Через «Увеличить»'},{id:'preview',label:'Масштаб в меню'}];
@@ -23,6 +24,7 @@ if (РАЗМЕРЫ[размерОкна].id === 'custom') {
 function запомнить() {
   const size = РАЗМЕРЫ[размерОкна];
   const params = new URLSearchParams({preset:selected.id, size:size.id, toolbar:selectedToolbar,entry:selectedEntry});
+  if(touchPreview)params.set('input','touch');
   if (size.id === 'custom') {
     params.set('width',size.ширина);
     params.set('height',size.высота);
@@ -33,7 +35,7 @@ function запомнить() {
 function открыть(count = selected.count, shares = selected.shares) {
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=19300e526c8b37da&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry);
+  подготовитьОкно('frame.html?v=2acd262c2485d00a&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
   запомнить();
   нарисовать();
   вписать();
