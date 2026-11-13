@@ -8,7 +8,10 @@ const entryMethods = [{id:'final',label:'Финальная'},{id:'maximize',lab
 // The chosen version is fixed; legacy catalogues and implementations stay available in source.
 let selectedEntry = 'final';
 let selectedToolbar = 'v6';
-let selected = presets.find(p => p.id === (address.get('preset') || location.hash.slice(1))) || presets[0];
+const initialPreset = globalThis.performance?.getEntriesByType?.('navigation')?.[0]?.type === 'reload'
+  ? 'solo-camera' : address.get('preset') || location.hash.slice(1);
+let selected = presets.find(p => p.id === initialPreset) || presets[0];
+let pendingCount = null, peopleRequest = 0, peopleTimer = 0;
 размерОкна = Math.max(0, РАЗМЕРЫ.findIndex(s => s.id === address.get('size')));
 if (РАЗМЕРЫ[размерОкна].id === 'custom') {
   for (const [axis, key] of [['ширина','width'],['высота','height']]) {
@@ -33,13 +36,52 @@ function запомнить() {
 }
 
 function открыть(count = selected.count, shares = selected.shares) {
+  pendingCount = null;
+  clearTimeout(peopleTimer);
+  peopleRequest++;
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=2acd262c2485d00a&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
+  подготовитьОкно('frame.html?v=e1b8d161fbd764d4&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
   запомнить();
   нарисовать();
   вписать();
 }
+
+function отправитьЗаполнение() {
+  if (pendingCount === null || подготовка || окно.contentDocument?.documentElement.dataset.prototypeReady !== 'true') return;
+  const request = ++peopleRequest;
+  clearTimeout(peopleTimer);
+  окно.contentWindow.postMessage({type:'participant-zoom-people', count:pendingCount, shares:selected.shares, request}, location.origin);
+  peopleTimer = setTimeout(() => {
+    if (request !== peopleRequest || pendingCount === null) return;
+    const status = эл('div','sh-transition-error','Не удалось изменить состав. ');
+    status.setAttribute('role','status');
+    const retry = эл('button','','Повторить');
+    retry.type = 'button';
+    retry.onclick = () => {status.remove(); отправитьЗаполнение();};
+    status.append(retry);
+    ошибкаПерехода?.remove(); ошибкаПерехода = status; рамка.append(status);
+  }, 5000);
+}
+
+function изменитьЗаполнение(count) {
+  selected = presets.find(p => p.count === count && p.shares === Math.min(selected.shares, count - 1));
+  pendingCount = count;
+  ошибкаПерехода?.remove(); ошибкаПерехода = null;
+  запомнить(); нарисовать(); вписать();
+  отправитьЗаполнение();
+}
+
+window.addEventListener('message', event => {
+  if (event.origin !== location.origin || event.source !== окно.contentWindow) return;
+  if (event.data?.type === 'prototype-frame-ready') отправитьЗаполнение();
+  if (event.data?.type === 'participant-zoom-people-applied' && event.data.request === peopleRequest) {
+    if (event.data.applied) {
+      clearTimeout(peopleTimer); pendingCount = null;
+      ошибкаПерехода?.remove(); ошибкаПерехода = null;
+    }
+  }
+});
 
 function нарисовать() {
   const active = document.activeElement;
@@ -48,7 +90,7 @@ function нарисовать() {
   const filters = эл('div','sh-filters');
   const counts = [2,5,16];
   filters.append(
-    фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => открыть(counts[i])),
+    фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => изменитьЗаполнение(counts[i])),
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
   );
   панель.replaceChildren(шапкаУстройства(),filters);
