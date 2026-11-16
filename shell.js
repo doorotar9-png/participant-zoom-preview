@@ -41,7 +41,7 @@ function открыть(count = selected.count, shares = selected.shares) {
   peopleRequest++;
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=45da53b9c6de5edc&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
+  подготовитьОкно('frame.html?v=8185bcac5b8a1d03&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
   запомнить();
   нарисовать();
   вписать();
@@ -64,8 +64,8 @@ function отправитьЗаполнение() {
   }, 5000);
 }
 
-function изменитьЗаполнение(count) {
-  selected = presets.find(p => p.count === count && p.shares === Math.min(selected.shares, count - 1));
+function изменитьЗаполнение(count, shares = selected.shares) {
+  selected = presets.find(p => p.count === count && p.shares === Math.min(shares, count - 1));
   pendingCount = count;
   ошибкаПерехода?.remove(); ошибкаПерехода = null;
   запомнить(); нарисовать(); вписать();
@@ -122,7 +122,7 @@ function нарисовать() {
   const counts = [2,5,16];
   filters.append(
     фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => изменитьЗаполнение(counts[i])),
-    фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
+    фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => изменитьЗаполнение(selected.count,i)),
   );
   панель.replaceChildren(шапкаУстройства(),filters,стикерПроекта());
   if (focus) {
