@@ -29,6 +29,11 @@ body {
   font: 13px/1.4 Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--ink);
   background: var(--bg);
+  /* Figma53143:77082 — общая подложка макета и вспомогательной панели. */
+  background-image: url('./assets/workspace-pattern.jpg');
+  background-size: 128px 128px;
+  background-position: left top;
+  background-repeat: repeat;
 }
 
 /* Размер продукта выбран чипом; рамка вписывает его в доступное место. */
@@ -43,6 +48,26 @@ body {
 /* панель */
 .sh-panel { position: static; display: flex; flex-direction: column; width: var(--panel-width); height: 100%; max-width: none; max-height: none; min-height: 0; margin: 0; padding: 0; color: var(--ink); font: inherit; background: var(--panel); border: 0; border-left: 1px solid var(--line); }
 .sh-panel-slim { overflow-y: auto; }
+.sh-panel-slim > .sh-device, .sh-panel-slim > .sh-filters { flex-shrink: 0; }
+
+/* Figma53137:76981: стикер проекта внизу вспомогательной панели. */
+@font-face { font-family: 'PZ Sticker Inter'; src: url('./fonts/inter-latin-wght-normal.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'PZ Sticker Inter'; src: url('./fonts/inter-cyrillic-wght-normal.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'PZ Sticker Icons'; src: url('./icon-font/cbuc-icons.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: block; }
+.sh-sticker { --sticker-background: #f2f2f2; --sticker-label: #8991a9; --sticker-link: #313e78; --sticker-ink: #000; --sticker-radius: 8px; display: flex; flex: none; flex-direction: column; gap: 4px; width: 100%; margin-top: auto; padding: 6px; border-radius: var(--sticker-radius); color: var(--sticker-ink); background: var(--sticker-background); font: 400 14px/17px 'PZ Sticker Inter', Inter, sans-serif; letter-spacing: -.1974px; }
+.sh-sticker-status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 2px 8px; color: var(--sticker-label); }
+.sh-sticker-status-icon { flex: none; width: 16px; height: 17px; padding-bottom: 1px; color: #333; font: 400 16px/16px 'PZ Sticker Icons'; }
+.sh-sticker-card { padding: 6px; border-radius: var(--sticker-radius); background: var(--panel); }
+.sh-sticker-comment { font-size: 12px; line-height: 15px; letter-spacing: -.1692px; }
+.sh-sticker-row { display: flex; align-items: flex-start; gap: 4px; }
+.sh-sticker-label { flex: none; width: 59px; color: var(--sticker-label); }
+.sh-sticker-info { display: flex; flex: 1; flex-direction: column; gap: 4px; min-width: 0; }
+.sh-sticker-links { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding-bottom: 4px; }
+.sh-sticker-link { color: var(--sticker-link); text-decoration: underline; text-underline-offset: 1px; overflow-wrap: anywhere; }
+.sh-sticker-link:hover { text-decoration-thickness: 2px; }
+.sh-sticker-link:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; border-radius: 2px; }
+.sh-sticker-develop { display: flex; flex-direction: column; gap: 6px; }
+.sh-sticker-develop .sh-sticker-info { padding-bottom: 2px; }
 .sh-size-chip { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 20px; padding: 0; border: 0; border-radius: 10px; background: var(--well); color: var(--off); font: inherit; cursor: pointer; }
 .sh-size-chip-custom { width: auto; padding: 0 10px; }
 .sh-size-chip:hover { color: var(--ink); }

@@ -41,7 +41,7 @@ function открыть(count = selected.count, shares = selected.shares) {
   peopleRequest++;
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=e1b8d161fbd764d4&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
+  подготовитьОкно('frame.html?v=45da53b9c6de5edc&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
   запомнить();
   нарисовать();
   вписать();
@@ -83,6 +83,37 @@ window.addEventListener('message', event => {
   }
 });
 
+function стикерПроекта() {
+  const sticker = эл('footer','sh-sticker');
+  sticker.setAttribute('aria-label','О проекте');
+  const status = эл('div','sh-sticker-status');
+  const check = эл('span','sh-sticker-status-icon','\ue616');
+  check.setAttribute('aria-hidden','true');
+  status.append(check,эл('span','','Устный Ok'),эл('span','','21.10.26'));
+  const comment = эл('div','sh-sticker-card sh-sticker-comment','Рисование на демонстрации со стороны зрителя');
+  const design = эл('div','sh-sticker-card sh-sticker-row');
+  const info = эл('div','sh-sticker-info');
+  const links = эл('div','sh-sticker-links');
+  for (const [title, href] of [
+    ['Согласование макета','https://online.sbis.ru/opendoc.html?guid=01a133d2-c66e-7eda-b0eb-8b583e6febe1&client=3'],
+    ['Описание БП','https://online.sbis.ru/page/kbase_entity/67f767c5-8825-4f94-a32d-f74b4c2e3b52?folderId=408f3210-fd45-498a-880f-b461416d3090'],
+  ]) {
+    const link = эл('a','sh-sticker-link',title);
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    links.append(link);
+  }
+  info.append(эл('div','','Тютин Денис'),links);
+  design.append(эл('span','sh-sticker-label','Design:'),info);
+  const develop = эл('div','sh-sticker-card sh-sticker-develop');
+  const web = эл('div','sh-sticker-row');
+  web.append(эл('span','sh-sticker-label','web'),эл('span','sh-sticker-info','Егоров Максим'));
+  develop.append(эл('div','sh-sticker-label','Develop:'),web);
+  sticker.append(status,comment,design,develop);
+  return sticker;
+}
+
 function нарисовать() {
   const active = document.activeElement;
   const focus = панель.contains(active) && active.name
@@ -93,7 +124,7 @@ function нарисовать() {
     фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => изменитьЗаполнение(counts[i])),
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => открыть(selected.count,i)),
   );
-  панель.replaceChildren(шапкаУстройства(),filters);
+  панель.replaceChildren(шапкаУстройства(),filters,стикерПроекта());
   if (focus) {
     const control = [...панель.querySelectorAll('input,select,button')].find(e => e.name === focus.name && e.value === focus.value);
     control?.focus({preventScroll:true});
