@@ -18,14 +18,20 @@ function корректныйРазмер(значение) {
   return значение === '' || (/^\d+$/.test(значение) && Number(значение) > 0 && Number(значение) <= 16384);
 }
 
+function масштабДля(размер) {
+  const зазор = parseFloat(getComputedStyle(document.body).columnGap);
+  const доступнаяШирина = document.body.clientWidth - панель.offsetWidth - зазор;
+  return Math.max(0, Math.min(1, доступнаяШирина / размер.ширина, место.clientHeight / размер.высота));
+}
+
 /** Фрейм получает выбранный viewport, масштаб меняет только показ макета. */
 function вписать() {
   const размер = РАЗМЕРЫ[размерОкна];
-  const зазор = parseFloat(getComputedStyle(document.body).columnGap);
-  const доступнаяШирина = document.body.clientWidth - панель.offsetWidth - зазор;
-  const k = Math.max(0, Math.min(1, доступнаяШирина / размер.ширина, место.clientHeight / размер.высота));
+  const k = масштабДля(размер);
   рамка.style.width = размер.ширина * k + 'px';
-  рамка.style.height = размер.высота * k + 'px';
+  const видимаяВысота = размер.высота * k + 'px';
+  рамка.style.height = видимаяВысота;
+  панель.style.height = видимаяВысота;
   for (const кадр of рамка.querySelectorAll('iframe')) {
     кадр.style.width = размер.ширина + 'px';
     кадр.style.height = размер.высота + 'px';
@@ -148,15 +154,25 @@ function шапкаУстройства() {
       поле.setAttribute('aria-label', i ? 'Высота окна' : 'Ширина окна');
       поле.setAttribute('aria-describedby', ошибка.id);
       поле.setAttribute('aria-invalid', String(!корректныйРазмер(свойРазмер[ось])));
-      поле.addEventListener('input', () => {
+      function применитьРазмер(вводЗавершён) {
         свойРазмер[ось] = поле.value;
         поле.setAttribute('aria-invalid', String(!корректныйРазмер(поле.value)));
         ошибка.hidden = Object.values(свойРазмер).every(корректныйРазмер);
         if (!ошибка.hidden) return;
-        размер.ширина = Number(свойРазмер.ширина || размерДоВвода.ширина);
-        размер.высота = Number(свойРазмер.высота || размерДоВвода.высота);
+        const новый = {
+          ширина: Number(свойРазмер.ширина || размерДоВвода.ширина),
+          высота: Number(свойРазмер.высота || размерДоВвода.высота)
+        };
+        // Keep the editor visible while a short value is still being typed.
+        if (!вводЗавершён && новый.высота * масштабДля(новый) < устройство.offsetHeight) return;
+        Object.assign(размер, новый);
         вписать();
         запомнить();
+      }
+      поле.addEventListener('input', () => применитьРазмер(false));
+      поле.addEventListener('change', () => применитьРазмер(true));
+      поле.addEventListener('keydown', event => {
+        if (event.key === 'Enter') применитьРазмер(true);
       });
       поля.append(поле);
     });
