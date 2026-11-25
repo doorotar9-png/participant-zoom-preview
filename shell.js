@@ -41,7 +41,7 @@ function открыть(count = selected.count, shares = selected.shares) {
   peopleRequest++;
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=71551ff77e086eb8&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
+  подготовитьОкно('frame.html?v=12c7c14e372dce23&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
   запомнить();
   нарисовать();
   вписать();
