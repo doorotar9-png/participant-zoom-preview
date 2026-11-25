@@ -1,6 +1,7 @@
 // Project data on the original prototype shell. Base helpers are copied unchanged.
 const presets = JSON.parse(document.getElementById('presets').textContent);
 const address = new URLSearchParams(location.hash.slice(1));
+let presenterPlugin = address.get('plugin') !== 'false';
 const touchPreview = address.get('input') === 'touch';
 const toolbarVariants = JSON.parse(document.getElementById('toolbar-variants').textContent);
 const entryToolbarVariants = [{id:'v6',label:'Вариант 1 · Рука и рисование'},{id:'v6-toggle',label:'Вариант 2 · Карандаш вкл/выкл'}];
@@ -27,6 +28,7 @@ if (РАЗМЕРЫ[размерОкна].id === 'custom') {
 function запомнить() {
   const size = РАЗМЕРЫ[размерОкна];
   const params = new URLSearchParams({preset:selected.id, size:size.id, toolbar:selectedToolbar,entry:selectedEntry});
+  if(!presenterPlugin)params.set('plugin','false');
   if(touchPreview)params.set('input','touch');
   if (size.id === 'custom') {
     params.set('width',size.ширина);
@@ -41,7 +43,7 @@ function открыть(count = selected.count, shares = selected.shares) {
   peopleRequest++;
   selected = presets.find(p => p.count === count && p.shares === shares)
     || presets.find(p => p.count === count && p.shares === 0);
-  подготовитьОкно('frame.html?v=12c7c14e372dce23&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (touchPreview?'&input=touch':''));
+  подготовитьОкно('frame.html?v=f11e84f4139f1e5c&preset=' + selected.id + '&toolbar=' + selectedToolbar + '&entry=' + selectedEntry + (presenterPlugin?'':'&plugin=false') + (touchPreview?'&input=touch':''));
   запомнить();
   нарисовать();
   вписать();
@@ -114,6 +116,23 @@ function стикерПроекта() {
   return sticker;
 }
 
+function переключательПлагина() {
+  const setting = эл('div','sh-filter-list sh-plugin-setting');
+  const toggle = эл('button','sh-plugin-toggle');
+  toggle.type = 'button'; toggle.name = 'presenter-plugin'; toggle.value = 'plugin';
+  toggle.setAttribute('role','switch');
+  toggle.setAttribute('aria-checked',String(presenterPlugin));
+  const track = эл('span','sh-switch-track');
+  track.setAttribute('aria-hidden','true');
+  toggle.append(track,эл('span','sh-switch-caption','Плагин у демонстрирующего'));
+  toggle.onclick = () => {
+    presenterPlugin = !presenterPlugin;
+    запомнить(); синхронизировать(); нарисовать();
+  };
+  setting.append(toggle);
+  return setting;
+}
+
 function нарисовать() {
   const active = document.activeElement;
   const focus = панель.contains(active) && active.name
@@ -124,6 +143,7 @@ function нарисовать() {
     фильтр('Заполнение','fill',['1 на 1','Типовое представление','Максимальное представление'],counts.indexOf(selected.count),i => изменитьЗаполнение(counts[i])),
     фильтр('Сценарии','share',['Без демонстрации','Одна демонстрация','Две демонстрации'].slice(0,selected.count === 2 ? 2 : 3),selected.shares,i => изменитьЗаполнение(selected.count,i)),
   );
+  if(selected.shares > 0)filters.append(переключательПлагина());
   панель.replaceChildren(шапкаУстройства(),filters,стикерПроекта());
   if (focus) {
     const control = [...панель.querySelectorAll('input,select,button')].find(e => e.name === focus.name && e.value === focus.value);
@@ -136,6 +156,7 @@ function синхронизировать() {
   for(const frame of рамка.querySelectorAll('iframe')) {
     frame.contentWindow?.postMessage({type:'participant-zoom-entry',method:selectedEntry},location.origin);
     frame.contentWindow?.postMessage({type:'participant-zoom-variant',variant:selectedToolbar},location.origin);
+    frame.contentWindow?.postMessage({type:'participant-zoom-presenter-plugin',available:presenterPlugin},location.origin);
   }
 }
 рамка.addEventListener('load',event => {if(event.target instanceof HTMLIFrameElement) синхронизировать();},true);

@@ -97,6 +97,18 @@ body {
 .sh-radio input:checked { border: 2px solid var(--pick-ring); background: var(--pick); }
 .sh-radio input:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; }
 .sh-radio:has(input:checked) { color: var(--ink); }
+.sh-plugin-setting { margin-top: 6px; }
+.sh-plugin-toggle { display: flex; align-items: center; gap: var(--offset_xs,6px); width: 100%; min-height: var(--caption_height_switcher,24px); padding: 0; border: 0; background: transparent; color: var(--label_text-color,#8991a9); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.sh-plugin-toggle:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; border-radius: 4px; }
+/* platform-company/kit: Switch filled/m, toggle.css + theme/default.css. */
+.sh-switch-track { position: relative; box-sizing: content-box; flex: none; width: var(--width_switcher,22px); height: var(--height_horizontal_switcher,14px); border: var(--border-thickness,1px) solid; border-radius: var(--border-radius_switcher,100px); border-color: var(--unaccented_contrast_background-color,#dbdbdb); background: var(--unaccented_contrast_background-color,#dbdbdb); }
+.sh-switch-track::after { content: ''; position: absolute; top: 1px; left: 1px; width: var(--marker_size_switcher,12px); height: var(--marker_size_switcher,12px); border-radius: 50%; background: var(--marker_contrast-color_switcher,#fff); }
+.sh-plugin-toggle[aria-checked='true'] { color: var(--text-color,#000); }
+.sh-plugin-toggle[aria-checked='true'] .sh-switch-track { border-color: var(--primary_color,#f6733c); background: var(--primary_color,#f6733c); }
+.sh-plugin-toggle[aria-checked='true'] .sh-switch-track::after { left: calc(100% - var(--marker_size_switcher,12px) - 1px); }
+.sh-plugin-toggle:hover .sh-switch-track { border-color: var(--unaccented_hover_contrast_background-color,#ccc); background: var(--unaccented_hover_contrast_background-color,#ccc); }
+.sh-plugin-toggle[aria-checked='true']:hover .sh-switch-track { border-color: var(--primary_hover_color,#e4662f); background: var(--primary_hover_color,#e4662f); }
+.sh-plugin-toggle:hover .sh-switch-caption { text-decoration: underline; }
 .sh-note { margin: 0; color: var(--off); font-size: 13px; line-height: 18px; }
 .sh-note + .sh-note { margin-top: 6px; }
 /* выпадающий список уровня: стрелка — рамкой псевдоэлемента, цвет из токена */
